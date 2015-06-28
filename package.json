@@ -1,0 +1,16 @@
+{
+  "name": "App-testing",
+  "version": "0.0.0",
+  "description": "WorkSpacing",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "Dakia Franck",
+  "license": "MIT",
+  "devDependencies": {
+    "express": "~4.13.0",
+    "ejs": "~2.3.1",
+    "jade": "~1.11.0"
+  }
+}
