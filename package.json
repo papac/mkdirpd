@@ -1,16 +1,23 @@
 {
-  "name": "App-testing",
-  "version": "0.0.0",
-  "description": "WorkSpacing",
-  "main": "app.js",
+  "name": "mkdirpd",
+  "version": "0.0.2",
+  "description": "Simple create and delete folders",
+  "main": "index.js",
   "scripts": {
-    "test": "node app.js"
+    "test": "node test/app.js"
   },
   "author": "Dakia Franck",
   "license": "MIT",
-  "devDependencies": {
-    "express": "~4.13.0",
-    "ejs": "~2.3.1",
-    "jade": "~1.11.0"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/papac/mkdirpd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/papac/mkdir/issues"
+  },
+  "homepage": "https://github.com/papac/mkdirpd#readme",
+  "dependencies": {
+    "colors": "^1.1.2"
+  },
+  "devDependencies": {}
 }
