@@ -1,6 +1,6 @@
 {
-  "name": "App-testing",
-  "version": "0.0.0",
+  "name": "mkdirpd",
+  "version": "0.0.1",
   "description": "WorkSpacing",
   "main": "app.js",
   "scripts": {
@@ -8,9 +8,15 @@
   },
   "author": "Dakia Franck",
   "license": "MIT",
-  "devDependencies": {
-    "express": "~4.13.0",
-    "ejs": "~2.3.1",
-    "jade": "~1.11.0"
-  }
+  "dependencies": {
+    "color": "~0.10.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/papac/mkdir.git"
+  },
+  "bugs": {
+    "url": "https://github.com/papac/mkdir/issues"
+  },
+  "homepage": "https://github.com/papac/mkdir#readme"
 }

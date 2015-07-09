@@ -4,6 +4,7 @@ module.exports = (function(){
 
 	var fs = require("fs");
 	var fn = null, mode = null;
+	var color = require("colors");
 
 	function fnMode(arg, isExist) {
 
@@ -26,6 +27,11 @@ module.exports = (function(){
 			if(fn !== null) {
 				return fn({message: "File exists"});
 			}
+			
+			console.log(color.red("Directory exist."));
+			
+			process.exit();
+			return;
 		}
 
 		return {
@@ -37,9 +43,9 @@ module.exports = (function(){
 
 	return {
 		create: function(path) {
-
+			
 			fs.exists(path, function(isExist) {
-
+				
 				var param = fnMode(arguments, isExist);
 
 				if(param.fn !== null) {
