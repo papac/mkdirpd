@@ -31,7 +31,7 @@ module.exports = (function(){
 				var currentPath = "";
 				if(exit) {
 					if(options.fn !== "undefined") 
-						options.fn({info: "[create error: " + color.red("sorry directory exist.") + "]"})
+						options.fn(new Error("[create error: " + color.red("sorry directory exist.") + "]"));
 					return;
 				}
 				
@@ -78,10 +78,10 @@ module.exports = (function(){
 
 				listener
 					.on("createError", function(err) {
-						options.fn(err);
+						options.fn(new Error("Folder creation error."));
 					})
 					.on("created", function(err) {
-						options.fn(err);
+						options.fn(false);
 					});
 
 			});
