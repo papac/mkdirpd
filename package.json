@@ -1,7 +1,8 @@
 {
   "name": "mkdirpd",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple create and delete folders",
+  "keywords":"mkdir md create",
   "main": "index.js",
   "scripts": {
     "test": "node test/app.js"
