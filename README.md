@@ -19,6 +19,24 @@ md.create("folders/to/child", function(err) {
 	console.log("Success");
 });
 ```
+## Exemple
+```js
+var md = require("../index.js");
 
+md.create("controller/model/views", function(err) {
+	if (err) {
+		throw err;
+	}
+	console.log("folders have created");
+	setTimeout(function() {
+		md.delete("controller/model/views", function(err) {
+			if (err) {
+				throw err;
+			}
+			console.log("folders have deleted.");
+		});
+	}, 3000);
+});
+```
 ##Licence
 __MIT__
