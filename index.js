@@ -7,14 +7,14 @@ module.exports = (function(){
 	var color = require("colors");
 	var EventEmitter = require("events").EventEmitter;
 	var listener = new EventEmitter();
+	var msg = {
+		pathError: color.red("String given"),
+		dirExist: color.red("sorry directory exist"),
+		dirMissing: color.yellow("Missing directory or not empty")
+	};
 
 	return {
 		create: function(path, mode, fn) {
-
-			if(typeof path === "object") {
-				console.log(color.red("=> [path] parameter is a string or array."));
-				return;
-			}
 
 			var options = {};
 
@@ -24,21 +24,31 @@ module.exports = (function(){
 			} else if (typeof mode === "string") {
 				if(typeof fn === "function") options.fn = fn;
 				if(/^0[\d]+$/.test(mode)) options.mode = mode;
+				else options.mode = "0777";
+			}
+
+			if(typeof path !== "string") {
+				if (typeof options.fn === "function") {
+					options.fn(new Error(msg.pathError), "");
+				} else {
+					console.log(msg.pathError);
+				}
+				return;
 			}
 
 			fs.exists(path, function(exit) {
 
-				var currentPath = "";
+				var currentDir = "";
 				if(exit) {
 					if(options.fn !== "undefined") 
-						options.fn(new Error("[create error: " + color.red("sorry directory exist.") + "]"));
+						options.fn(new Error(msg.dirExist), "");
 					return;
 				}
 				
 				if(typeof path === "string") {
 					var parts = path.split("/");
 					path = {
-						folders: path.split("/"),
+						folders: parts,
 						len: parts.length,
 						recursive: true
 					};
@@ -57,58 +67,86 @@ module.exports = (function(){
 
 				if(path.recursive) {
 
-					for(var i = 0; i < path.len; i++) {
-						currentPath += path.folders[i] + (i < path.len - 1 ? "/" : "");
-						fs.mkdir(currentPath, options.mode, function(err) {
-							if(err) return listener.emit("createError", err);
-							if(i == path.len - 1) listener.emit("created", null);
-						});
+					for(var i = 1; i <= path.len; i++) {
+						currentDir += path.folders[i-1] + (i < path.len ? "/" : "");
+						(function(index, currDir) {
+							fs.mkdir(currDir, options.mode, function(err) {
+								if(err) return listener.emit("error", err, currDir);
+								else if(index == path.len) listener.emit("created", false);
+							});
+						})(i, currentDir);
 					}
 
 				}else {
-					for(var i = 0; i < path.len; i++) {
-						currentPath = path.folders[i];
-						fs.mkdir(currentPath, function(err) {
-							if(err) return listener.emit("createError", err);
-							if(i == path.len - 1) listener.emit("created", null);
-						})
+					for(var i = 1; i <= path.len; i++) {
+						currentDir = path.folders[i-1];
+						(function(index, currDir) {
+							fs.mkdir(currDir, function(err) {
+								if(err) return listener.emit("error", err, currDir);
+								else if(index == path.len) listener.emit("created", false);
+							});
+						})(i, currentDir);
 					}
 				}
 
-
 				listener
-					.on("createError", function(err) {
-						options.fn(new Error("Folder creation error."));
+					.on("error", function(err, currentDir) {
+						if (typeof options.fn === "function"){
+							options.fn(err, currentDir);
+						}
 					})
 					.on("created", function(err) {
-						options.fn(false);
+						if (typeof options.fn === "function") {
+							options.fn(err);
+						}
 					});
-
 			});
 		},
 		delete: function(path, fn) {
+
+			if (typeof path !== "string") {
+				if (typeof fn !== "function") {
+					return fn(new Error(msg.pathError));
+				} else {
+					console.error(msg.pathError);
+				}
+				return;
+			}
 
 			fs.exists(path, function(exit) {
 
 				if(!exit) {
 					if(fn !== "undefined")
-						fn({info: "[delete error: " + color.red("sorry directory not exist.") + "]"})
+						fn(new Error(msg.dirMissing));
 					return;
 				}
 
-				if(fn !== "undefined") {
-					fs.rmdir(path, function(err) {
-						return fn(err);
-					});
-				} else {
-					fs.rmdir(path);
+				var  folders = path.split("/");
+				for (var i = 1, len = folders.length; i <= len; i++) {
+					path = folders.join("/");
+					(function(index, currentDir) {
+						fs.rmdir(currentDir, function(err) {
+							if (err) return listener.emit("delError", err);
+							else if (index === len) listener.emit("deleted");
+						});
+					})(i, path);
+					folders.pop();
 				}
-
 			});
 
+			listener
+				.on("delError", function(err) {
+					if (typeof fn === "function") {
+						fn(err);
+					}
+				})
+				.on("deleted", function() {
+					if (typeof fn === "function") {
+						fn();
+					}
+				});
 		}
 	};
-
 })();
 
 
