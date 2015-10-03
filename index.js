@@ -1,152 +1,124 @@
 "use strict";
+var fs = require("fs");
+var color = require("colors");
+var msg = {
+	pathError: color.red("✗ string given or array given."),
+	dirExist: color.red("✗ sorry directory exist."),
+	dirMissing: color.yellow("⚠ Missing directory or not empty."),
+	folderCreated: color.green("✓ Folder created.")
+};
 
-module.exports = (function(){
+// Module.
+var mkdirpd = function(path, mode, fn) {
 
-	var fs = require("fs");
-	var fn = null, mode = null;
-	var color = require("colors");
-	var EventEmitter = require("events").EventEmitter;
-	var listener = new EventEmitter();
-	var msg = {
-		pathError: color.red("String given"),
-		dirExist: color.red("sorry directory exist"),
-		dirMissing: color.yellow("Missing directory or not empty")
-	};
+	if (typeof mode === "function") {
+		fn = mode;
+		mode = "0777";
+	} else if (typeof mode === "string") {
+		if(typeof fn !== "function") { fn = function (err) {}; }
+		if(/^0[\d]+$/.test(mode)) { mode = mode }
+		else { mode = "0777" }
+	}
 
-	return {
-		create: function(path, mode, fn) {
+	if (typeof path !== "string" && !Array.isArray(path)) {
+		if (typeof fn !== "undefined") {
+			fn(new Error(msg.pathError));
+		} else {
+			throw new Error(msg.pathError);
+		}
+	}
 
-			var options = {};
+	if (typeof path === "string") {
+		path = path.split(require("path").sep);
+	}
 
-			if(typeof mode === "function") {
-				options.fn = mode;
-				options.mode = "0777";
-			} else if (typeof mode === "string") {
-				if(typeof fn === "function") options.fn = fn;
-				if(/^0[\d]+$/.test(mode)) options.mode = mode;
-				else options.mode = "0777";
-			}
-
-			if(typeof path !== "string") {
-				if (typeof options.fn === "function") {
-					options.fn(new Error(msg.pathError), "");
-				} else {
-					console.log(msg.pathError);
-				}
-				return;
-			}
-
-			fs.exists(path, function(exit) {
-
-				var currentDir = "";
-				if(exit) {
-					if(options.fn !== "undefined") 
-						options.fn(new Error(msg.dirExist), "");
-					return;
-				}
-				
-				if(typeof path === "string") {
-					var parts = path.split("/");
-					path = {
-						folders: parts,
-						len: parts.length,
-						recursive: true
-					};
-				} else {
-					path = {
-						len: path.length,
-						folders: path,
-						recursive: false
-					};
-				}
-
-				if(path.folders[path.len - 1] === '') {
-					delete path.folders.pop();
-					path.len = path.folders.length;
-				}
-
-				if(path.recursive) {
-
-					for(var i = 1; i <= path.len; i++) {
-						currentDir += path.folders[i-1] + (i < path.len ? "/" : "");
-						(function(index, currDir) {
-							fs.mkdir(currDir, options.mode, function(err) {
-								if(err) return listener.emit("error", err, currDir);
-								else if(index == path.len) listener.emit("created", false);
-							});
-						})(i, currentDir);
-					}
-
-				}else {
-					for(var i = 1; i <= path.len; i++) {
-						currentDir = path.folders[i-1];
-						(function(index, currDir) {
-							fs.mkdir(currDir, function(err) {
-								if(err) return listener.emit("error", err, currDir);
-								else if(index == path.len) listener.emit("created", false);
-							});
-						})(i, currentDir);
-					}
-				}
-
-				listener
-					.on("error", function(err, currentDir) {
-						if (typeof options.fn === "function"){
-							options.fn(err, currentDir);
-						}
-					})
-					.on("created", function(err) {
-						if (typeof options.fn === "function") {
-							options.fn(err);
+	path.push("end");
+	var currentDir = "";
+	// create folders
+	path.reduce(function (current, next) {
+		currentDir += current + "/";
+		+function (currentDir) {
+			fs.exists(currentDir, function (exists) {
+				if (!exists) {
+					fs.mkdir(currentDir, mode, function (err) {
+						if (next == "end") {
+							fn(err);
 						}
 					});
-			});
-		},
-		delete: function(path, fn) {
-
-			if (typeof path !== "string") {
-				if (typeof fn !== "function") {
-					return fn(new Error(msg.pathError));
-				} else {
-					console.error(msg.pathError);
-				}
-				return;
-			}
-
-			fs.exists(path, function(exit) {
-
-				if(!exit) {
-					if(fn !== "undefined")
-						fn(new Error(msg.dirMissing));
-					return;
-				}
-
-				var  folders = path.split("/");
-				for (var i = 1, len = folders.length; i <= len; i++) {
-					path = folders.join("/");
-					(function(index, currentDir) {
-						fs.rmdir(currentDir, function(err) {
-							if (err) return listener.emit("delError", err);
-							else if (index === len) listener.emit("deleted");
-						});
-					})(i, path);
-					folders.pop();
 				}
 			});
+		} (currentDir);
+		return next;
+	});
+};
 
-			listener
-				.on("delError", function(err) {
-					if (typeof fn === "function") {
-						fn(err);
-					}
-				})
-				.on("deleted", function() {
-					if (typeof fn === "function") {
-						fn();
+// Delete recucive function.
+mkdirpd.__proto__.delete = function (path, fn) {
+	// verify path
+	if (typeof path !== "string") {
+		if (typeof fn === "function") {
+			return fn(new Error(msg.pathError));
+		} else {
+			console.error(msg.pathError);
+		}
+		return;
+	}
+	// path exists...
+	fs.exists(path, function(exit) {
+		if (!exit) {
+			if(fn !== "undefined")
+				fn(new Error(msg.dirMissing));
+			return;
+		}
+		var  folders = path.split("/");
+		for (var i = 1, len = folders.length; i <= len; i++) {
+			path = folders.join("/");
+			+function (currentDir) {
+				fs.rmdir(currentDir, function(err) {
+					if (err) {
+						if (typeof fn === "function") {
+							return fn(err)
+						} else {
+							throw err;
+						}
 					}
 				});
+			} (path);
+			folders.pop();
 		}
-	};
-})();
+	});
+};
 
+// sync function
+mkdirpd.__proto__.sync = function(path, mode) {
 
+	if (typeof mode === 'undefined') {
+		mode = "0777";
+	}
+
+	if (typeof path !== "string" && !Array.isArray(path)) {
+		throw new Error(msg.pathError);
+	}
+
+	if (typeof path === "string") {
+		path = path.split(require("path").sep);
+	}
+
+	path.push(" ");
+	var currentDir = "";
+
+	path.reduce(function(current, next) {
+		currentDir += current + "/";
+		+function (chunk) {
+			fs.exists(chunk, function (exists) {
+				if (!exists) {
+					fs.mkdirSync(chunk, mode);
+				}
+			});
+		}(currentDir);
+		return next;
+	});
+
+};
+
+module.exports = mkdirpd;

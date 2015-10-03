@@ -1,35 +1,61 @@
 ## mkdirpd
 Simple create or delete directory.
 
-### Usage
-```js
-var mkdir = require("mkdirpd");
-mkdir.create("path/to/folders" [, mode] [, function]);
-// or
-mkdir.delete("path/to/folders" [, function]);
-```
-by defautl `mode` equal to 0777, and function take one parameter, `err`.
+## Change
+So you are use this module. Please update you code.
+* mkdir.create change to mkdir()
+* add sync function
+
+## Install
 
 ```js
-var md = require("mkdirpd");
-md.create("folders/to/child", function(err) {
+// Local install
+npm install mkdirpd --save-dev
+// global install
+npm install -g mkdirpd
+```
+
+### Usage
+```js
+
+var mkdir = require("mkdirpd");
+
+mkdir("path/to/folders" [, mode = "0777"] [, function]);
+
+mkdir(["folder", "other_folders"] [, mode = "0777"] [, function]);
+
+mkdir.delete("path/to/folders" [, function]);
+
+mkdir.synx("path/to/folders");
+
+mkdir.synx(["folder", "other_folders"]);
+
+```
++ by default `mode` equal to 0777.
+
+```js
+var mkdir = require("mkdirpd");
+mkdir("folders/to/child", function(err) {
 	if (err) {
-		throw err;	
+		throw err;
 	}
 	console.log("Success");
 });
 ```
 ## Exemple
-```js
-var md = require("../index.js");
 
-md.create("controller/model/views", function(err) {
+### Create and delete folders
+
+```js
+var mkdir = require("mkdirpd");
+
+mkdir("controller/model/views", function(err) {
 	if (err) {
 		throw err;
 	}
 	console.log("folders have created");
 	setTimeout(function() {
-		md.delete("controller/model/views", function(err) {
+		mkdir.delete("controller/model/views", function(err) {
 			if (err) {
 				throw err;
 			}
@@ -38,5 +64,29 @@ md.create("controller/model/views", function(err) {
 	}, 3000);
 });
 ```
-##Licence
-__MIT__
+
+## Licence
+
+MIT Licence
+Copyright (c) 2015 "Franck Dakia"
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
