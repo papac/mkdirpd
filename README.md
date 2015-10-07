@@ -31,7 +31,7 @@ mkdir.synx("path/to/folders");
 mkdir.synx(["folder", "other_folders"]);
 
 ```
-+ by default `mode` equal to 0777.
++ by default, ` mode ` equals ` 0777 `.
 
 ```js
 var mkdir = require("mkdirpd");
