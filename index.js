@@ -2,6 +2,7 @@
 var fs = require( "fs" );
 var color = require( "colors" );
 var sep = require( "path" ).sep;
+
 var msg = {
 	pathError: color.red( "✗ string given or array given." ),
 	dirExist: color.red( "✗ sorry directory exist." ),
@@ -16,7 +17,7 @@ var mkdirpd = function( path, mode, fn ) {
 		fn = mode;
 		mode = "0777";
 	} else if ( typeof mode === "string" ) {
-		if ( /^0[\d]+$/.test( mode ) ) {
+		if ( /^0[\d]{3}$/.test( mode ) ) {
 			mode = mode;
 		} else {
 			mode = "0777"
@@ -61,6 +62,7 @@ var mkdirpd = function( path, mode, fn ) {
 
 // Delete recucive function.
 mkdirpd.__proto__.delete = function( path, fn ) {
+
 	// verify path
 	if ( typeof path !== "string" ) {
 		if ( typeof fn === "function" ) {
@@ -70,6 +72,7 @@ mkdirpd.__proto__.delete = function( path, fn ) {
 		}
 		return;
 	}
+
 	// path exists...
 	fs.exists( path, function( exit ) {
 		if ( !exit ) {
@@ -100,7 +103,7 @@ mkdirpd.__proto__.delete = function( path, fn ) {
 // sync function
 mkdirpd.__proto__.sync = function( path, mode ) {
 
-	if ( typeof mode === 'undefined' ) {
+	if ( typeof mode === "undefined" ) {
 		mode = "0777";
 	}
 
@@ -128,5 +131,6 @@ mkdirpd.__proto__.sync = function( path, mode ) {
 	} );
 
 };
+
 // export module.
 module.exports = mkdirpd;
