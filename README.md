@@ -26,9 +26,9 @@ mkdir(["folder", "other_folders"] [, mode = "0777"] [, function]);
 
 mkdir.delete("path/to/folders" [, function]);
 
-mkdir.synx("path/to/folders");
+mkdir.sync("path/to/folders");
 
-mkdir.synx(["folder", "other_folders"]);
+mkdir.sync(["folder", "other_folders"]);
 
 ```
 + by default, ` mode ` equals ` 0777 `.
