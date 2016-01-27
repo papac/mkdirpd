@@ -1,4 +1,5 @@
 "use strict";
+
 var fs = require( "fs" );
 var color = require( "colors" );
 var sep = require( "path" ).sep;
